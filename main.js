@@ -160,6 +160,7 @@ global.install = () => {
         action: {
             attackController: load("creep.action.attackController"),
             avoiding: load("creep.action.avoiding"),
+            boosting: load('creep.action.boosting'),
             building: load("creep.action.building"),
             bulldozing: load('creep.action.bulldozing'),
             charging: load("creep.action.charging"),
