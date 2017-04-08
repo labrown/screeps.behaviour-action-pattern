@@ -43,9 +43,12 @@ const action = class extends Creep.Action {
         // target is lab
         return target instanceof StructureLab &&
             // target has the minimum energy and mineral
-            target.energy >= LAB_BOOST_ENERGY && target.mineralAmount >= LAB_BOOST_MINERAL &&
-            // mineralType is a boosting compound
-            this.isValidMineralType(target.mineralType) &&
+            target.energy >= LAB_BOOST_ENERGY && target.mineralAmount >= LAB_BOOST_MINERAL;
+    }
+    
+    isAddableTarget(target, creep) {
+        // mineralType is a boosting compound
+        return super.isAddableTarget(target, creep) && this.isValidMineralType(target.mineralType) &&
             // creep has active body parts matching the mineralType's boost
             creep.hasActiveBodyparts(this.getBoostPartType(target.mineralType)) &&
             // can further boost parts of the mineralType's boost
