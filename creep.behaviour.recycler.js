@@ -16,12 +16,9 @@ mod.run = function(creep) {
         logError('Creep without action/activity!\nCreep: ' + creep.name + '\ndata: ' + JSON.stringify(creep.data));
     }
 };
-mod.nextAction = function(creep) {
-    Creep.action.recycling.assign(creep);
-};
 mod.actionPriority = function() {
     return [
-        // Creep.action.picking, // TODO only energy
+        Creep.action.picking,
         Creep.action.withdrawing,
         Creep.action.uncharging,
         Creep.action.travelling,
