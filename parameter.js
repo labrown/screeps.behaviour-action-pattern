@@ -55,6 +55,7 @@ let mod = {
         ROAD: false, // highlight weakest road and display hits
         HEATMAP: false, // collects creep positioning to display a heatmap. WARNING: HIGH MEMORY USAGE
         HEATMAP_INTERVAL: 2, // intervals between collections
+        ACTION_ASSIGNMENT: true, // draws a line from a creep and it's new assignment
     },
     // function parameters: room. expected result: boolean
     SEMI_AUTOMATIC_CONSTRUCTION: true, // enables semi-automatic construction. Will construct based on flags.
@@ -175,6 +176,7 @@ let mod = {
     ACTION_SAY: { // what gets said on creep.action.*.onAssignment
         ATTACK_CONTROLLER: String.fromCodePoint(0x1F5E1) + String.fromCodePoint(0x26F3), // 🗡⛳
         AVOIDING: String.fromCodePoint(0x21A9), // ↩
+        BOOSTING: String.fromCodePoint(0x1F4AA), // 💪🏼
         BUILDING: String.fromCodePoint(0x2692), // ⚒
         BULLDOZING: String.fromCodePoint(0x1F69C), // 🚜
         CHARGING: String.fromCodePoint(0x1F50C), // 🔌

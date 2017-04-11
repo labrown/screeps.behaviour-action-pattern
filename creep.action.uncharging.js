@@ -83,10 +83,6 @@ action.work = function(creep){
     creep.target = null;
     return workResult;
 };
-action.onAssignment = function(creep, target) {
-    //if( SAY_ASSIGNMENT ) creep.say(String.fromCharCode(9738), SAY_PUBLIC);
-    if( SAY_ASSIGNMENT ) creep.say(ACTION_SAY.UNCHARGING, SAY_PUBLIC);
-};
 action.defaultStrategy.isValidAction = function(creep) {
     return creep.sum < creep.carryCapacity || false;
 };
