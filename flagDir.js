@@ -232,10 +232,10 @@ mod.execute = function() {
 
     let triggerFound = entry => {
         if( !entry.cloaking || entry.cloaking == 0) {
-            let p = startProfiling('Flag.execute');
+            const p = Util.startProfiling('Flag.execute', {enabled:PROFILING.FLAGS});
             const flag = Game.flags[entry.name];
             Flag.found.trigger(flag);
-            p.checkCPU(entry.name, 2, mod.flagType(flag));
+            p.checkCPU(entry.name, PROFILING.EXECUTE_LIMIT, mod.flagType(flag));
         }
     };
     this.list.forEach(triggerFound);
@@ -268,7 +268,7 @@ mod.specialFlag = function(create) {
     if (create) {
         if (!flag) {
             return _(Game.rooms).values().some(function (room) {
-                new RoomPosition(49, 49, room.name).createFlag(name, COLOR_WHITE, COLOR_PURPLE);
+                room.getPositionAt(49, 49).newFlag({color: COLOR_WHITE, secondaryColor: COLOR_PURPLE}, name);
                 return true;
             });
         } else if (flag.pos.roomName !== 'W0N0') {

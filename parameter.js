@@ -1,19 +1,28 @@
+global._ME = _(Game.rooms).map('controller').filter('my').map('owner.username').first();
 let mod = {
-    ME: _(Game.rooms).map('controller').filter('my').map('owner.username').first(),
+    ME: _ME,
     CHATTY: false, // creeps say their current action
     HONK: true, // HONK when stored path is blocked by other creeps
     OOPS: true, // Creeps say Oops when dropping energy during dropmining
     SAY_ASSIGNMENT: true, // say a symbol representing the assiged action
     SAY_PUBLIC: true, // creeps talk public
     DEBUG: true, // gimme some more details, use false not undefined to unset
+    DEBUG_STACKS: false, // add stack frame to EVERY console.log message (spammy!)
     TRACE: false, // use Memory.debugTrace for low-level information
     PROFILE: false, // enable CPU profiling
     PROFILING: {
         ANALYZE_LIMIT: 2, // profile warning levels
-        AVERAGE_USAGE: true, // display average creep & flag usage
+        AVERAGE_USAGE: false, // display average creep & flag usage
+        BASIC_ONLY: true, // only display basic profiling information, disables all other profiling
+        CREEPS: false, // display creep profiling information
+        CREEP_TYPE: '', // define a specific creep to profile, requires CREEPS=true
         EXECUTE_LIMIT: 5, // profile warning levels
+        FLAGS: false, // display flag profiling information
         FLUSH_LIMIT: 5, // profile warning levels
+        MAIN: true, // profile main loop
+        MIN_THRESHOLD: 0.5, // set the bar for checks that involve very low usage (warning, chatty!)
         REGISTER_LIMIT: 2, // profile warning levels
+        ROOMS: false, // display room and structure profiling information
     },
     TRAVELER_STUCK_TICKS: 2, // Number of ticks not moving to be considered stuck by the Traveler API
     TRAVELER_THRESHOLD: 5, // Average creep CPU usage/tick before warning about pathing cost, starts after 25 ticks
@@ -111,6 +120,7 @@ let mod = {
     LIMIT_URGENT_REPAIRING: 750, // urgent repair when hits below
     GAP_REPAIR_DECAYABLE: 800, // decayables (e.g. roads) only get repaired when that much hits are missing
     MEMORY_RESYNC_INTERVAL: 500, // interval to reload spawns & towers present in a room
+    PROCESS_ORDERS_INTERVAL: 500, // interval to process room orders and run terminalBroker
     TIME_REPORT: 28000, // ticks between room reports
     REPORT_MAX_LENGTH: 500,
     REPORTS_PER_LOOP: 18,
@@ -133,7 +143,7 @@ let mod = {
     // function parameters: room. expected result: array
     CONSTRUCTION_PRIORITY: [STRUCTURE_SPAWN,STRUCTURE_EXTENSION,STRUCTURE_LINK,STRUCTURE_TERMINAL,STRUCTURE_STORAGE,STRUCTURE_TOWER,STRUCTURE_POWER_SPAWN,STRUCTURE_NUKER,STRUCTURE_OBSERVER,STRUCTURE_ROAD,STRUCTURE_CONTAINER,STRUCTURE_EXTRACTOR,STRUCTURE_LAB,STRUCTURE_WALL,STRUCTURE_RAMPART],
     CONTROLLER_SIGN: true,
-    CONTROLLER_SIGN_MESSAGE: `Territory of ${this.ME}, an Open Collaboration Society user! (https://github.com/ScreepsOCS)`,
+    CONTROLLER_SIGN_MESSAGE: `Territory of ${_ME}, an Open Collaboration Society user! (https://github.com/ScreepsOCS)`,
     CONTROLLER_SIGN_UPDATE: false, // Update sign message if user changes CONTROLLER_SIGN_MESSAGE
     MINERS_AUTO_BUILD: false, // miners and remoteMiners will build their own containers if they are missing.
     MINER_WORK_THRESHOLD: 50, // how long to wait before a miner checks for repairs/construction sites nearby again
@@ -153,7 +163,7 @@ let mod = {
     PIONEER_UNOWNED: false, // True: pioneers may attempt to work in unowned rooms.
     DRIVE_BY_REPAIR_RANGE: 2, // range that creeps should search when trying to repair and move
     REMOTE_WORKER_MULTIPLIER: 1, // Number of workers spawned per remote mining room.
-    PLAYER_WHITELIST: ['cyberblast','SirLovi','Asku','Kazume','Noxeth','MrDave','Telemac','Xephael','Zoiah','fsck-u','FaceWound','forkmantis','Migaaresno','xAix1999','silentpoots','arguinyano','OokieCookie','OverlordQ','Nibinhilion','Crowsbane','Yew','BogdanBiv','s1akr','Pandabear41','Logmadr','Patrik','novice','Conquest','ofirl','GeorgeBerkeley','TTR','tynstar','K-C','Hoekynl','Sunri5e','AgOrange','distantcam','Lisp','bbdMinimbl','Twill','Logxen','miR','Spedwards','Krazyfuq','Icesory','chobobobo','deft-code','mmmd','DKPlugins','pavelnieks','buckley310','almaravarion','SSH','Perrytheplatypus','Jnesselr','ryagas','xXtheguy52Xx','SEATURTLEKING','DasBrain','C00k1e_93','Currency','Vykook','shedletsky','Aranatha','Montblanc','emb3r'],
+    PLAYER_WHITELIST: ['cyberblast','SirLovi','Asku','Kazume','Noxeth','MrDave','Telemac','Xephael','Zoiah','fsck-u','FaceWound','forkmantis','Migaaresno','xAix1999','silentpoots','arguinyano','OokieCookie','OverlordQ','Nibinhilion','Crowsbane','Yew','BogdanBiv','s1akr','Pandabear41','Logmadr','Patrik','novice','Conquest','ofirl','GeorgeBerkeley','TTR','tynstar','K-C','Hoekynl','Sunri5e','AgOrange','distantcam','Lisp','bbdMinimbl','Twill','Logxen','miR','Spedwards','Krazyfuq','Icesory','chobobobo','deft-code','mmmd','DKPlugins','pavelnieks','buckley310','almaravarion','SSH','Perrytheplatypus','Jnesselr','ryagas','xXtheguy52Xx','SEATURTLEKING','DasBrain','C00k1e_93','Currency','Vykook','shedletsky','Aranatha','Montblanc','emb3r','Mudla'],
     // Don't attack. Must be a member of OCS for permanent whitelisting in git repository. But you can change your own copy... Please ask if you are interested in joining OCS :)
     DEFENSE_BLACKLIST: [], // Don't defend those rooms (add room names). Blocks spawning via defense task (will not prevent offensive actions at all)
     CRITICAL_BUCKET_LEVEL: 1000, // take action when the bucket drops below this value to prevent the bucket from actually running out
@@ -166,19 +176,19 @@ let mod = {
         ATTACK_CONTROLLER: String.fromCodePoint(0x1F5E1) + String.fromCodePoint(0x26F3), // 🗡⛳
         AVOIDING: String.fromCodePoint(0x21A9), // ↩
         BUILDING: String.fromCodePoint(0x2692), // ⚒
-        BULLDOZING: String.fromCodePoint(0x1F4CC), // 📌
-        CHARGING: String.fromCodePoint(0x1F50B), // 🔋
+        BULLDOZING: String.fromCodePoint(0x1F69C), // 🚜
+        CHARGING: String.fromCodePoint(0x1F50C), // 🔌
         CLAIMING: String.fromCodePoint(0x26F3), // ⛳
         DEFENDING: String.fromCodePoint(0x2694), // ⚔
         DISMANTLING: String.fromCodePoint(0x1F527), // 🔧
         DROPPING: String.fromCodePoint(0x1F4A9), // 💩
-        FEEDING: String.fromCodePoint(0x1F355) + String.fromCodePoint(0x1F35F), // 🍕🍟
+        FEEDING: String.fromCodePoint(0x1F355), // 🍕
         FORTIFYING: String.fromCodePoint(0x1F528), // 🔨
         FUELING: String.fromCodePoint(0x26FD), // ⛽
         GUARDING: String.fromCodePoint(0x1F46E) + String.fromCodePoint(0x1F3FC), // 👮🏼
         HARVESTING: String.fromCodePoint(0x26CF), // ⛏
         HEALING: String.fromCodePoint(0x26E8), // ⛨
-        IDLE: String.fromCodePoint(0x1F3B6), // 🎶
+        IDLE: String.fromCodePoint(0x1F3B5), // 🎵
         INVADING: String.fromCodePoint(0x1F52B), // 🔫
         PICKING: String.fromCodePoint(0x23EC), // ⏬
         REALLOCATING: String.fromCodePoint(0x2194), // ↔
@@ -188,9 +198,9 @@ let mod = {
         ROBBING: String.fromCodePoint(0x1F480), // 💀
         STORING: String.fromCodePoint(0x1F4E5) + String.fromCodePoint(0xFE0E), // 📥
         TRAVELLING: String.fromCodePoint(0x1F3C3), // 🏃
-        UNCHARGING: String.fromCodePoint(0x1F4E4) + String.fromCodePoint(0xFE0E), // 📤
+        UNCHARGING: String.fromCodePoint(0x1F50B), // 🔋
         UPGRADING: String.fromCodePoint(0x1F5FD), // 🗽
-        WITHDRAWING: String.fromCodePoint(0x1F4E4), // 📤
+        WITHDRAWING: String.fromCodePoint(0x1F4E4) + String.fromCodePoint(0xFE0E), // 📤
     }
 };
 module.exports = mod;
