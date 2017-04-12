@@ -3,16 +3,7 @@ module.exports = mod;
 mod.name = 'delivery';
 mod.minControllerLevel = 4;
 // hook into events
-mod.register = () => {
-    // when a new flag has been found (occurs every tick, for each flag)
-    Flag.found.on( flag => Task.delivery.handleFlagFound(flag) );
-    // a creep starts spawning
-    Creep.spawningStarted.on( params => Task.delivery.handleSpawningStarted(params) );
-    // a creep completed spawning
-    Creep.spawningCompleted.on( creep => Task.delivery.handleSpawningCompleted(creep) );
-    // a creep died
-    Creep.died.on( name => Task.delivery.handleCreepDied(name) );
-};
+mod.register = () => {};
 mod.memory = (roomName) => {
     let memory = Task.memory(mod.name, roomName);
     if( !memory.hasOwnProperty('queued') ){
@@ -44,14 +35,9 @@ mod.handleFlagFound = function(flag) {
 };
 mod.checkForRequiredCreeps = function(flag) {
     // check for delivery en route, and spawn a new one if the last was successful
-    let memory = mod.memory(flag.pos.roomName);
+    constmemory = mod.memory(flag.pos.roomName);
 
-    if (Game.time % 500 === 0) {
-        Task.validateMemoryQueued(mod, memory);
-        Task.validateMemorySpawning(mod, memory);
-        Task.validateMemoryRunning(mod, memory);
-    }
-
+    Task.validateAll(memory, flag, mod.name, {roomName: flag.pos.roomName, checkValid: true});
     if (memory.queued.length + memory.spawning.length > 0) {
         return;
     }
@@ -85,7 +71,7 @@ mod.checkForRequiredCreeps = function(flag) {
                 minEnergyCapacity: 100
             },
             creepSetup => { // callback onQueued
-                let memory = Task.delivery.memory(Game.flags[creepSetup.destiny.targetName].pos.roomName);
+                const memory = Task.delivery.memory(Game.flags[creepSetup.destiny.targetName].pos.roomName);
                 memory.queued.push({
                     room: creepSetup.queueRoom,
                     name: creepSetup.name
@@ -102,9 +88,9 @@ mod.handleSpawningStarted = function(params) {
     if (flag) {
         // get task memory
         let memory = Task.delivery.memory(flag.pos.roomName);
-        if( memory.queued ) memory.queued.pop();
         // save spawning creep to task memory
         memory.spawning.push(params);
+        Task.validateQueued(memory, flag, mod.name);
     }
 
     // assign destination flag?
@@ -121,27 +107,27 @@ mod.handleSpawningCompleted = function(creep) {
     if (flag) {
         // get task memory
         let memory = Task.delivery.memory(flag.pos.roomName);
-        if( memory.spawning ) memory.spawning.pop();
-
+        Task.validateSpawning(memory, flag, mod.name);
         creep.data.predictedRenewal = creep.data.spawningTime + (routeRange(creep.data.homeRoom, flag.pos.roomName)*50);
 
         // save running creep to task memory
         memory.running.push(creep.name);
     }
 };
-mod.handleCreepDied = Task.handleCreepDied(mod);
-//     function(creepName) {
-//     const entry = Population.getCreep(creepName);
-//     if( !(entry && entry.destiny && entry.destiny.task === mod.name) ) {
-//         return;
-//     }
-//     const flag = Game.flags[entry.destiny.targetName];
-//     if (flag) {
-//         const running = mod.memory(flag.pos.roomName).running;
-//         const index = _.indexOf(running, creepName);
-//         running.splice(index, 1);
-//     }
-// };
+mod.handleCreepDied = function(task) {
+    return function(creepName) {
+        const entry = Population.getCreep(creepName);
+        if( !(entry && entry.destiny && entry.destiny.task === task.name) ) {
+            return;
+        }
+        const memoryKey = task.memoryKey(entry);
+        if (memoryKey) {
+            const running = task.memory(memoryKey).running;
+            const index = _.indexOf(running, creepName);
+            running.splice(index, 1);
+        }
+    };
+};
 mod.creep = {
     recycler: {
         fixedBody: [CARRY, MOVE],
