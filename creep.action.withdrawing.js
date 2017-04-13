@@ -16,7 +16,7 @@ action.isValidTarget = function(target){
 action.newTarget = function(creep) {
     const terminal = creep.room.terminal;
     const storage = creep.room.storage;
-    if (terminal && Creep.action.withdrawing.isValidTarget(terminal) && terminal.charge > 1) {
+    if (terminal && Creep.action.withdrawing.isValidTarget(terminal)) {
         return terminal;
     } else if (terminal || storage) {
         return _.max([terminal, storage], 'charge');
