@@ -27,9 +27,9 @@ action.work = function(creep){
     return creep.withdraw(creep.target, RESOURCE_ENERGY);
 };
 action.assignDebounce = function(creep, outflowActions) {
-    const target = action.newTarget(creep);
-    if (target) {
-        if (target instanceof StructureStorage && creep.data.lastAction === 'storing' && creep.data.lastTarget === creep.room.storage.id) {
+    const withdrawTarget = action.newTarget(creep);
+    if (withdrawTarget) {
+        if (withdrawTarget instanceof StructureStorage && creep.data.lastAction === 'storing' && creep.data.lastTarget === creep.room.storage.id) {
             // cycle detected
             const dummyCreep = {
                 carry:{},
@@ -41,21 +41,21 @@ action.assignDebounce = function(creep, outflowActions) {
             const stored = creep.room.storage.store[RESOURCE_ENERGY];
             const maxWithdraw = stored > creep.carryCapacity ? creep.carryCapacity : stored;
             dummyCreep.carry[RESOURCE_ENERGY] = maxWithdraw; // assume we get a full load of energy
-            let target = null;
+            let nextTarget = null;
             const validAction = _.find(outflowActions, a => {
                 if (a.name !== 'storing' && a.isValidAction(dummyCreep) && a.isAddableAction(dummyCreep)) {
-                    target = a.newTarget(dummyCreep);
-                    return !!target;
+                    nextTarget = a.newTarget(dummyCreep);
+                    return !!nextTarget;
                 }
                 return false;
             });
-            if (validAction && action.assign(creep, target)) {
+            if (validAction && action.assign(creep, withdrawTarget)) {
                 creep.data.nextAction = validAction.name;
-                creep.data.nextTarget = target.id;
+                creep.data.nextTarget = nextTarget.id;
                 return true;
             }
         } else {
-            return action.assign(creep, target);
+            return action.assign(creep, withdrawTarget);
         }
     }
     return false;
