@@ -178,7 +178,7 @@ mod.FLAG_COLOR = {
         skipRoom: {
             color: COLOR_WHITE,
             secondaryColor: COLOR_GREEN,
-        }
+        },
     },
 };
 mod.DECAY_AMOUNT = {
