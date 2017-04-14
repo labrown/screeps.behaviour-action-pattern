@@ -46,7 +46,7 @@ action.assignDebounce = function(creep, outflowActions) {
     return false;
 };
 action.defaultStrategy.isValidAction = function(creep) {
-    return (
+    return !!(
         ((creep.room.storage && creep.room.storage.store[RESOURCE_ENERGY]) ||
         (creep.room.terminal && creep.room.terminal.store[RESOURCE_ENERGY])) &&
         creep.data.creepType !== 'privateer' &&
