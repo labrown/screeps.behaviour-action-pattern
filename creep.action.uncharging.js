@@ -1,8 +1,8 @@
-let action = new Creep.Action('uncharging'); // get from container
+let action = new Creep.Action('uncharging'); // get from container/link
 module.exports = action;
 action.renewTarget = false;
+action.maxPerTarget = 1;
 action.isAddableAction = function(creep){ return true; }
-action.isAddableTarget = function(target){ return true;}
 action.isValidAction = function(creep){
     return creep.getStrategyHandler([action.name], 'isValidAction', creep);
 };
