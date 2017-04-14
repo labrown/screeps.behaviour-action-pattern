@@ -2799,6 +2799,7 @@ mod.analyze = function() {
         }
     };
     _.forEach(Game.rooms, r => {
+        if (FlagDir.find(FLAG_COLOR.command.skipRoom, r)) return false;
         getEnvironment(r);
         p.checkCPU(r.name, PROFILING.ANALYZE_LIMIT / 5);
     });

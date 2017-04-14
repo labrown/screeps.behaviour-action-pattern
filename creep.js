@@ -60,6 +60,7 @@ mod.extend = function(){
         if( !this.spawning ){
             if(!behaviour && this.data && this.data.creepType) {
                 behaviour = Creep.behaviour[this.data.creepType];
+                if (FlagDir.find(FLAG_COLOR.command.skipRoom, this.room)) return;
                 if ( Memory.CPU_CRITICAL && !CRITICAL_ROLES.includes(this.data.creepType) ) {
                     return;
                 }
