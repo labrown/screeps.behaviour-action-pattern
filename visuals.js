@@ -58,7 +58,34 @@ Visuals.extend = function() {
                 opacity: BAR_STYLE.opacity
             });
             vis.text(`GCL: ${Game.gcl.level} (${(GCL_PERCENTAGE * 100).toFixed(2)}%)`, x + sectionWidth / 2, y);
-            
+            //  Spawn Pressure
+            let spawnCount = _.size(Game.spawns);
+            let numSpawnsSpawning = function () {
+                let count = 0;
+                for (let spawnName in Game.spawns) {
+                    if (Game.spawns[spawnName].spawning !== null) count++;
+                }
+                return count;
+            }
+            let numToSpawn = function () {
+                let count = 0;
+                for(let roomName in Game.rooms) {
+                    const room = Game.rooms[roomName];
+                    count += _.size(room.spawnQueueHigh);
+                    count += _.size(room.spawnQueueMedium);
+                    count += _.size(room.spawnQueueLow);
+                }
+                return count;
+            }
+            vis.rect(x, y + 0.75, sectionWidth, 1, BAR_STYLE);
+            let pressure = (numSpawnsSpawning() + numToSpawn()) / spawnCount;
+                pressure = Math.min(1, pressure);
+            vis.rect(x, y + 0.75, pressure * sectionWidth, 1, {
+                fill: getColourByPercentage(pressure),
+                opacity: BAR_STYLE.opacity
+            });
+            vis.text(`Spawn Pressure: ${(pressure * 100).toFixed(2)}%`, x + sectionWidth / 2, y + 1.5);
+
             // CPU
             x += sectionWidth + bufferWidth;
             vis.rect(x, y - 0.75, sectionWidth, 1, BAR_STYLE);
@@ -607,6 +634,7 @@ Visuals.run = function() {
             Visuals.drawCreepPath(room);
             p2.checkCPU('Creep Paths', PROFILING.VISUALS_LIMIT);
         }
+        Visuals.drawSpawnPressure(room);
     }
     p.checkCPU('Total for all rooms', PROFILING.VISUALS_LIMIT);
     if (VISUALS.ROOM_GLOBAL) {
