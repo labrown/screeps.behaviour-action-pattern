@@ -634,7 +634,6 @@ Visuals.run = function() {
             Visuals.drawCreepPath(room);
             p2.checkCPU('Creep Paths', PROFILING.VISUALS_LIMIT);
         }
-        Visuals.drawSpawnPressure(room);
     }
     p.checkCPU('Total for all rooms', PROFILING.VISUALS_LIMIT);
     if (VISUALS.ROOM_GLOBAL) {
