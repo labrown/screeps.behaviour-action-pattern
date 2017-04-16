@@ -47,7 +47,7 @@ Visuals.extend = function() {
         const BAR_STYLE = Visuals.barStyle;
         
         let x = bufferWidth;
-        const y = 2;
+        let y = 2;
         if (VISUALS.ROOM) {
             // GCL
             x = bufferWidth * 2 + sectionWidth;
@@ -58,33 +58,6 @@ Visuals.extend = function() {
                 opacity: BAR_STYLE.opacity
             });
             vis.text(`GCL: ${Game.gcl.level} (${(GCL_PERCENTAGE * 100).toFixed(2)}%)`, x + sectionWidth / 2, y);
-            //  Spawn Pressure
-            let spawnCount = _.size(Game.spawns);
-            let numSpawnsSpawning = function () {
-                let count = 0;
-                for (let spawnName in Game.spawns) {
-                    if (Game.spawns[spawnName].spawning !== null) count++;
-                }
-                return count;
-            }
-            let numToSpawn = function () {
-                let count = 0;
-                for(let roomName in Game.rooms) {
-                    const room = Game.rooms[roomName];
-                    count += _.size(room.spawnQueueHigh);
-                    count += _.size(room.spawnQueueMedium);
-                    count += _.size(room.spawnQueueLow);
-                }
-                return count;
-            }
-            vis.rect(x, y + 0.75, sectionWidth, 1, BAR_STYLE);
-            let pressure = (numSpawnsSpawning() + numToSpawn()) / spawnCount;
-                pressure = Math.min(1, pressure);
-            vis.rect(x, y + 0.75, pressure * sectionWidth, 1, {
-                fill: getColourByPercentage(pressure),
-                opacity: BAR_STYLE.opacity
-            });
-            vis.text(`Spawn Pressure: ${(pressure * 100).toFixed(2)}%`, x + sectionWidth / 2, y + 1.5);
 
             // CPU
             x += sectionWidth + bufferWidth;
@@ -110,6 +83,33 @@ Visuals.extend = function() {
             // Tick
             x += sectionWidth + bufferWidth;
             vis.text(`Tick: ${Game.time}`, x, y, {align: 'left'});
+        
+            //  Second Row
+            x = bufferWidth * 2 + sectionWidth;
+            y += 1.5;
+            //  Spawn Pressure
+            const spawnCount = _.size(Game.spawns);
+            const numSpawnsSpawning = function () {
+                return _(Game.spawns).reject('spawning').size();
+            }
+            const numToSpawn = function () {
+                let count = 0;
+                _.forEach (Game.rooms, room => {
+                    count += _.size(room.spawnQueueHigh);
+                    count += _.size(room.spawnQueueMedium);
+                    count += _.size(room.spawnQueueLow);
+                })
+                return count;
+            }
+            vis.rect(x, y - 0.75, sectionWidth, 1, BAR_STYLE);
+            let pressure = (numSpawnsSpawning() + numToSpawn()) / spawnCount;
+                pressure = Math.min(1, pressure);
+            vis.rect(x, y - 0.75, pressure * sectionWidth, 1, {
+                fill: getColourByPercentage(pressure),
+                opacity: BAR_STYLE.opacity
+            });
+            vis.text(`Spawn Pressure: ${(pressure * 100).toFixed(2)}%`, x + sectionWidth / 2, y);
+                
         }
         if (VISUALS.CPU) {
             Visuals.drawSparkline(undefined, 1.5, 46.5, 20, 2, _.map(Memory.visualStats.cpu, (v, i) => Memory.visualStats.cpu[i]), Visuals.sparklineStyle);
