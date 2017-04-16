@@ -87,28 +87,18 @@ Visuals.extend = function() {
             //  Second Row
             x = bufferWidth * 2 + sectionWidth;
             y += 1.5;
-            //  Spawn Pressure
+            
+            //  SPAWN PRESSURE
             const spawnCount = _.size(Game.spawns);
-            const numSpawnsSpawning = function () {
-                return _(Game.spawns).reject('spawning').size();
-            }
-            const numToSpawn = function () {
-                let count = 0;
-                _.forEach (Game.rooms, room => {
-                    count += _.size(room.spawnQueueHigh);
-                    count += _.size(room.spawnQueueMedium);
-                    count += _.size(room.spawnQueueLow);
-                })
-                return count;
-            }
+            let count = _(Game.spawns).filter('spawning').size();
+            count += _(Game.rooms).map(r => r.spawnQueueHigh.concat(r.spawnQueueMedium, r.spawnQueueLow)).size();
             vis.rect(x, y - 0.75, sectionWidth, 1, BAR_STYLE);
-            let pressure = (numSpawnsSpawning() + numToSpawn()) / spawnCount;
-                pressure = Math.min(1, pressure);
-            vis.rect(x, y - 0.75, pressure * sectionWidth, 1, {
-                fill: getColourByPercentage(pressure),
+            const PRESSURE_PERCENTAGE = Math.min(1, count / spawnCount);
+            vis.rect(x, y - 0.75, PRESSURE_PERCENTAGE * sectionWidth, 1, {
+                fill: getColourByPercentage(PRESSURE_PERCENTAGE),
                 opacity: BAR_STYLE.opacity
             });
-            vis.text(`Spawn Pressure: ${(pressure * 100).toFixed(2)}%`, x + sectionWidth / 2, y);
+            vis.text(`Spawn Pressure: ${(count / spawnCount * 100).toFixed(2)}%`, x + sectionWidth / 2, y);
                 
         }
         if (VISUALS.CPU) {
