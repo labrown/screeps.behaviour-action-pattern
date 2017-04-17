@@ -109,7 +109,6 @@ const Visuals = class {
             const room = Game.rooms[roomName];
             if (!room) return;
             if (!ROOM_VISUALS_ALL && !room.my) return;
-            if (!room.controller) return;
             const p2 = Util.startProfiling('Visuals: ' + room.name, {enabled: PROFILING.VISUALS});
             
             Util.set(Memory, 'heatmap', false);
@@ -126,7 +125,11 @@ const Visuals = class {
                     return;
                 }
             }
-            
+            if (VISUALS.CREEP) {
+                room.creeps.forEach(creep => this.drawCreepPath(creep));
+                p2.checkCPU('Creep Paths', PROFILING.VISUALS_LIMIT);
+            }
+            if (!room.controller) return;
             if (VISUALS.ROOM) {
                 this.drawRoomInfo(room, VISUALS.ROOM_GLOBAL);
                 p2.checkCPU('Room Info', PROFILING.VISUALS_LIMIT);
@@ -185,10 +188,6 @@ const Visuals = class {
             if (VISUALS.LABS) {
                 room.structures.labs.all.forEach(lab => this.drawLabInfo(lab));
                 p2.checkCPU('Labs', PROFILING.VISUALS_LIMIT);
-            }
-            if (VISUALS.CREEP) {
-                room.creeps.forEach(creep => this.drawCreepPath(creep));
-                p2.checkCPU('Creep Paths', PROFILING.VISUALS_LIMIT);
             }
             if (VISUALS.TOWER) {
                 room.structures.towers.forEach(tower => this.drawTowerInfo(tower));
