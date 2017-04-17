@@ -344,8 +344,25 @@ const Visuals = class {
             // BUCKET
             this.drawPie(vis, Game.cpu.bucket, 10000, 'Bucket', getColourByPercentage(Math.min(1, Game.cpu.bucket / 10000), true), {x, y: y++});
             
+            //  SPAWN CAPACITY UTILIZATION (SCU)
+            const spawnCount = _.size(Game.spawns);
+            let count = _(Game.spawns).filter('spawning').size();
+            const globalQueueCount = function () {
+                let count = 0;    
+                for(let roomName in Game.rooms) {
+                    const room = Game.rooms[roomName];
+                    count += _.size(room.spawnQueueHigh);
+                    count += _.size(room.spawnQueueMedium);
+                    count += _.size(room.spawnQueueLow);
+                }
+                return count;
+            }
+            count += globalQueueCount();
+            const SCU_PERCENTAGE = count / spawnCount;
+            this.drawPie(vis, SCU_PERCENTAGE, 1, 'SCU', getColourByPercentage(SCU_PERCENTAGE), {x, y: y++});
+
             // TICK
-            y += 11;
+            y += 15;
             vis.text('Tick', x, y++, {
                 color: WHITE,
                 align: 'center',
