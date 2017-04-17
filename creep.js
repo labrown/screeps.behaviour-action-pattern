@@ -10,19 +10,15 @@ mod.extend = function(){
     };
     // to maintain legacy code for now
     Creep.prototype.findGroupMemberByType = function(creepType, flagName) {
-        return Creep.prototype.findGroupMemberBy('creepType', creepType, flagName);
+        return Creep.prototype.findGroupMemberBy(c => c.creepType === creepType, flagName);
     };
-    Creep.prototype.findGroupMemberBy = function(property, targetValue, flagName) {
+    Creep.prototype.findGroupMemberBy = function(findFunc, flagName) {
         if (_.isUndefined(flagName)) flagName = this.data.flagName;
-        if (!_.isUndefined(targetValue) && flagName) {
-            for(const creepName in Memory.population) {
-                const data = Memory.population[creepName];
-                if (_.get(data, property) === targetValue && data.flagName === flagName) {
-                    return creepName;
-                }
-            }
+        if (!_.isUndefined(findFunc) && flagName) {
+            const ret = _(Memory.population).filter({flagName}).find(findFunc);
+            return ret ? ret.creepName : null;
         } else {
-            logError(`Invalid arguments for Creep.findGroupMemberBy ${property} ${targetValue} ${flagName}`);
+            Util.logError(`${this.name} - Invalid arguments for Creep.findGroupMemberBy ${flagName} ${findFunc}`);
         }
         return null;
     };
@@ -201,6 +197,7 @@ mod.extend = function(){
         // check if on road/structure
         let here = _.chain(this.room.structures.piles).filter('pos', this.pos)
             .concat(this.room.lookForAt(LOOK_STRUCTURES, this.pos))
+            .concat(this.room.lookForAt(LOOK_CONSTRUCTION_SITES, this.pos, {filter: s => s.my}))
             .value();
         if( here && here.length > 0 ) {
             let path;
@@ -211,6 +208,8 @@ mod.extend = function(){
                     return { pos: s.pos, range: 2 };
                 })).concat(this.pos.findInRange(FIND_EXIT, 2).map(function (e) {
                     return { pos: e, range: 1 };
+                })).concat(this.room.myConstructionSites.map(function(o) {
+                    return { pos: o.pos, range: 1};
                 }));
 
                 let ret = PathFinder.search(
@@ -274,8 +273,9 @@ mod.extend = function(){
     };
     
     Creep.prototype.controllerSign = function() {
-        if(CONTROLLER_SIGN && (!this.room.controller.sign || this.room.controller.sign.username != this.owner.username || (CONTROLLER_SIGN_UPDATE && this.room.controller.sign.text != CONTROLLER_SIGN_MESSAGE))) {
-            this.signController(this.room.controller, CONTROLLER_SIGN_MESSAGE);
+        const signMessage = Util.fieldOrFunction(CONTROLLER_SIGN_MESSAGE, this.room);
+        if(CONTROLLER_SIGN && (!this.room.controller.sign || this.room.controller.sign.username !== this.owner.username || (CONTROLLER_SIGN_UPDATE && this.room.controller.sign.text !== signMessage))) {
+            this.signController(this.room.controller, signMessage);
         }
     };
 
