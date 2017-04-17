@@ -274,7 +274,7 @@ const Visuals = class {
             const BAR_STYLE = this.barStyle;
     
             let x = bufferWidth;
-            const y = 2;
+            let y = 2;
             const BAR_Y = y - 0.75;
             if (VISUALS.ROOM) {
                 // GCL
@@ -306,21 +306,29 @@ const Visuals = class {
                 x += sectionWidth + bufferWidth;
                 vis.text(`Tick: ${Game.time}`, x, y, {align: 'left'});
 
-                //  Second Row
+               //  Second Row
                 x = bufferWidth * 2 + sectionWidth;
                 y += 1.5;
                 
-                //  SPAWN PRESSURE
+                //  SPAWN CAPACITY UTILIZATION (SCU)
                 const spawnCount = _.size(Game.spawns);
                 let count = _(Game.spawns).filter('spawning').size();
-                count += _(Game.rooms).map(r => r.spawnQueueHigh.concat(r.spawnQueueMedium, r.spawnQueueLow)).size();
-                vis.rect(x, y - 0.75, sectionWidth, 1, BAR_STYLE);
-                const PRESSURE_PERCENTAGE = Math.min(1, count / spawnCount);
-                vis.rect(x, y - 0.75, PRESSURE_PERCENTAGE * sectionWidth, 1, {
-                    fill: getColourByPercentage(PRESSURE_PERCENTAGE),
-                    opacity: BAR_STYLE.opacity
+                const globalQueueCount = function () {
+                    let count = 0;    
+                    for(let roomName in Game.rooms) {
+                        const room = Game.rooms[roomName];
+                        count += _.size(room.spawnQueueHigh);
+                        count += _.size(room.spawnQueueMedium);
+                        count += _.size(room.spawnQueueLow);
+                    }
+                    return count;
+                }
+                count += globalQueueCount();
+                const SCU_PERCENTAGE = count / spawnCount;
+                this.drawBar(vis, Math.min(1, SCU_PERCENTAGE), x, y - 0.75, sectionWidth, 1, `SCU: ${(SCU_PERCENTAGE * 100).toFixed(2)}%`, {
+                    fill: getColourByPercentage(Math.min(1, SCU_PERCENTAGE)),
+                    opacity: BAR_STYLE.opacity,
                 });
-                vis.text(`Spawn Pressure: ${(count / spawnCount * 100).toFixed(2)}%`, x + sectionWidth / 2, y);                
             }
         } else {
             let x = bufferWidth + 1;
