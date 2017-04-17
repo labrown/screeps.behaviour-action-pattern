@@ -313,17 +313,7 @@ const Visuals = class {
                 //  SPAWN CAPACITY UTILIZATION (SCU)
                 const spawnCount = _.size(Game.spawns);
                 let count = _(Game.spawns).filter('spawning').size();
-                const globalQueueCount = function () {
-                    let count = 0;    
-                    for(let roomName in Game.rooms) {
-                        const room = Game.rooms[roomName];
-                        count += _.size(room.spawnQueueHigh);
-                        count += _.size(room.spawnQueueMedium);
-                        count += _.size(room.spawnQueueLow);
-                    }
-                    return count;
-                }
-                count += globalQueueCount();
+                count += _(Game.rooms).map(r => r.spawnQueueHigh.concat(r.spawnQueueMedium, r.spawnQueueLow)).flatten().size();
                 const SCU_PERCENTAGE = count / spawnCount;
                 this.drawBar(vis, Math.min(1, SCU_PERCENTAGE), x, y - 0.75, sectionWidth, 1, `SCU: ${(SCU_PERCENTAGE * 100).toFixed(2)}%`, {
                     fill: getColourByPercentage(Math.min(1, SCU_PERCENTAGE)),
@@ -347,17 +337,7 @@ const Visuals = class {
             //  SPAWN CAPACITY UTILIZATION (SCU)
             const spawnCount = _.size(Game.spawns);
             let count = _(Game.spawns).filter('spawning').size();
-            const globalQueueCount = function () {
-                let count = 0;    
-                for(let roomName in Game.rooms) {
-                    const room = Game.rooms[roomName];
-                    count += _.size(room.spawnQueueHigh);
-                    count += _.size(room.spawnQueueMedium);
-                    count += _.size(room.spawnQueueLow);
-                }
-                return count;
-            }
-            count += globalQueueCount();
+            count += _(Game.rooms).map(r => r.spawnQueueHigh.concat(r.spawnQueueMedium, r.spawnQueueLow)).flatten().size();
             const SCU_PERCENTAGE = count / spawnCount;
             this.drawPie(vis, SCU_PERCENTAGE, 1, 'SCU', getColourByPercentage(SCU_PERCENTAGE), {x, y: y++});
 
