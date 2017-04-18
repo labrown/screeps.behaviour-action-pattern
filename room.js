@@ -2747,8 +2747,28 @@ mod.extend = function(){
         if (x % 10 === 0) {
             if (y % 10 === 0) { // corner room
                 // TODO: Identify Corner Type:
-                // A: https://i.imgur.com/MCJqVDP.png
-                // B: https://i.imgur.com/zujNYkH.png
+                // https://i.imgur.com/zujNYkH.png
+                
+                let top = !!_.find(this.getPositionAt(25, 24).lookFor(LOOK_STRUCTURES), s => s instanceof StructureWall);
+                let left = !!_.find(this.getPositionAt(24, 25).lookFor(LOOK_STRUCTURES, s => s instanceof StructureWall));
+                
+                // both in same quadrant
+                if (Math.floor(object.x / 25) === Math.floor(target.x / 25) && Math.floor(object.y / 25) === Math.floor(target.y / 25)) return true;
+                
+                if (top) {
+                    if (left) {
+                        if (object.x < 25 && object.y < 25 && (target.x > 25 || target.y > 25)) return false;
+                    } else {
+                        if (object.x > 25 && object.y < 25 && (target.x < 25 || target.y > 25)) return false;
+                    }
+                } else {
+                    if (left) {
+                        if (object.x < 25 && object.y > 25 && (target.x > 25 || target.y < 25)) return false;
+                    } else {
+                        if (object.x > 25 && object.y > 25 && (target.x < 25 || target.y < 25)) return false;
+                    }
+                }
+                return true;
             }
             if ((object.x < 25 && target.x > 25) || (object.x > 25 && target.x < 25)) return false;
         }
