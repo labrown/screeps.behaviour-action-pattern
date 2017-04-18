@@ -2724,6 +2724,39 @@ mod.extend = function(){
     Room.prototype.invalidateCostMatrix = function() {
         Room.costMatrixInvalid.trigger(this.name);
     };
+    
+    Room.prototype.highwayHasWalls = function() {
+        if (!Room.isHighwayRoom(this.name)) return false;
+        return !!_.find(this.getPositionAt(25, 25).lookFor(LOOK_STRUCTURES), s => s instanceof StructureWall);
+    };
+    Room.prototype.isTargetAccessible = function(object, target) {
+        if (!object || !target) return;
+        // Checks. Accept RoomObject, RoomPosition, and mock position
+        if (object instanceof RoomObject) object = object.pos;
+        if (target instanceof RoomObject) target = target.pos;
+        for (const prop of ['x', 'y', 'roomName']) {
+            if (!Reflect.has(object, prop) || !Reflect.has(target, prop)) return;
+        }
+        
+        if (!Room.isHighwayRoom(room.name)) return;
+        if (!this.highwayHasWalls()) return true;
+        
+        const [x, y] = Room.calcCoordinates(this.name, (x, y) => [x, y]);
+        // TODO: Identify Center Highway Rooms
+        // https://i.imgur.com/mIlWUV4.png
+        if (x % 10 === 0) {
+            if (y % 10 === 0) { // corner room
+                // TODO: Identify Corner Type:
+                // A: https://i.imgur.com/MCJqVDP.png
+                // B: https://i.imgur.com/zujNYkH.png
+            }
+            if ((object.x < 25 && target.x > 25) || (object.x > 25 && target.x < 25)) return false;
+        }
+        if (y % 10 === 0) {
+            if ((object.y < 25 && target.y > 25) || (object.y > 25 && target.y < 25)) return false;
+        }
+        return true;
+    };
 };
 mod.flush = function(){
     let clean = room => {
