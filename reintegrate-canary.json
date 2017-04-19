@@ -1,0 +1,28 @@
+{
+  "ocs.internal": {
+    "reset": "upstream/dev",
+    "merge": [
+      "upstream/change/hopperTargets",
+      "upstream/feature/actionRenewing",
+      "upstream/task/invasion"
+    ]
+  },
+  "ocs.public": {
+    "reset": "upstream/dev",
+    "merge": [
+      "upstream/bug/droppingMovesToRandomFlag",
+      "upstream/change/efficientFeeding",
+      "upstream/change/highwayWalls",
+      "upstream/change/infectiousMemory",
+      "upstream/change/injectMerge",
+      "upstream/change/withdrawingTargets",
+      "upstream/feature/compressedSerialization",
+      "upstream/feature/deliveryTask",
+      "upstream/feature/explainSaysAssignment",
+      "upstream/fix/viralAvoidance",
+      "upstream/hotfix/actionLastSteps",
+      "upstream/visuals/pathsInSk",
+      "upstream/visuals/spawnPressure"
+    ]
+  }
+}
