@@ -15,6 +15,11 @@ mod.handleFlagFound = flag => {
 };
 // check if a new creep has to be spawned
 mod.checkForRequiredCreeps = (flag) => {
+    if( flag.room && flag.room.my ) {
+        // robbing own rooms is handled by Task.delivery
+        return;
+    }
+
     // get task memory
     let memory = Task.robbing.memory(flag);
     // re-validate if too much time has passed
@@ -37,7 +42,7 @@ mod.checkForRequiredCreeps = (flag) => {
                 task: mod.name, // taskName
                 targetName: flag.name, // targetName
                 homeRoom: storageRoom.name
-            }, 
+            },
             { // spawn room selection params
                 targetRoom: roomName,
                 explicit: spawnRoom.name,
