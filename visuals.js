@@ -438,7 +438,7 @@ const Visuals = class {
             this.drawPie(vis, val, max, title, getColourByPercentage(val / max, true), {x, y: y++}, inner);
             
             // Energy Available
-            if (!room.controller.reservation && !room.controller.owner) {
+            if (!room.controller.reservation && room.controller.owner) {
                 const PERCENTAGE = room.energyAvailable / room.energyCapacityAvailable || 0;
                 this.drawPie(vis, room.energyAvailable, room.energyCapacityAvailable, 'Energy', getColourByPercentage(PERCENTAGE, true), {x, y: y++});
             }
