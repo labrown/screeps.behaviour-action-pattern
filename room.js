@@ -982,14 +982,6 @@ mod.extend = function(){
         } else delete this.memory.spawns;
     };
 
-    Room.prototype.saveExtensions = function() {
-        const extensions = this.find(FIND_MY_STRUCTURES, {
-            filter: s => s instanceof StructureExtension
-        }).map(s => s.id);
-        if (extensions.length > 0) this.memory.extensions = extensions;
-        else delete this.memory.extensions;
-    };
-
     Room.prototype.saveMinerals = function() {
         let toPos = o => {
             return {
@@ -1821,7 +1813,6 @@ mod.analyze = function() {
                 room.saveMinerals();
                 room.saveTowers();
                 room.saveSpawns();
-                room.saveExtensions();
                 room.processConstructionFlags();
             }
             if (Game.time % PROCESS_ORDERS_INTERVAL === 0 || room.name === 'sim') {

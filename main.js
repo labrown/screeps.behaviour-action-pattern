@@ -226,6 +226,7 @@ global.install = () => {
     _.assign(Room, {
         _ext: {
             containers: load("room.container"),
+            extensions: load("room.extension"),
             labs: load("room.lab"),
             links: load("room.link"),
             nuker: load("room.nuker"),
