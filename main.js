@@ -232,6 +232,7 @@ global.install = () => {
             links: load("room.link"),
             nuker: load("room.nuker"),
             observers: load("room.observer"),
+            orders: load("room.orders"),
             powerSpawn: load("room.powerSpawn"),
             spawns: load("room.spawn"),
         },
