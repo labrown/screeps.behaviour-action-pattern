@@ -17,30 +17,6 @@ mod.extend = function(){
         if (Room._ext[key].extend) Room._ext[key].extend();
     }
 
-    let Nukers = function(room){
-        this.room = room;
-
-        Object.defineProperties(this, {
-            'all': {
-                configurable: true,
-                get: function() {
-                    if( _.isUndefined(this._all) ){
-                        this._all = [];
-                        let add = entry => {
-                            let o = Game.getObjectById(entry.id);
-                            if( o ) {
-                                _.assign(o, entry);
-                                this._all.push(o);
-                            }
-                        };
-                        _.forEach(this.room.memory.nukers, add);
-                    }
-                    return this._all;
-                }
-            },
-        });
-    };
-
     let Structures = function(room){
         this.room = room;
 
@@ -231,7 +207,7 @@ mod.extend = function(){
                 configurable: true,
                 get: function() {
                     if( _.isUndefined(this._nukers) ){
-                        this._nukers = new Nukers(this.room);
+                        this._nukers = new Room.Nuker(this.room);
                     }
                     return this._nukers;
                 }
@@ -1004,25 +980,6 @@ mod.extend = function(){
             let id = o => o.id;
             this.memory.spawns = _.map(spawns, id);
         } else delete this.memory.spawns;
-    };
-    Room.prototype.saveNukers = function() {
-        let nukers = this.find(FIND_MY_STRUCTURES, {
-            filter: (structure) => ( structure.structureType == STRUCTURE_NUKER )
-        });
-        if (nukers.length > 0) {
-            this.memory.nukers = [];
-
-            // for each entry add to memory ( if not contained )
-            let add = (nuker) => {
-                let nukerData = this.memory.nukers.find( (l) => l.id == nuker.id );
-                if( !nukerData ) {
-                    this.memory.nukers.push({
-                        id: nuker.id,
-                    });
-                }
-            };
-            nukers.forEach(add);
-        } else delete this.memory.nukers;
     };
 
     Room.prototype.saveExtensions = function() {
@@ -1864,7 +1821,6 @@ mod.analyze = function() {
                 room.saveMinerals();
                 room.saveTowers();
                 room.saveSpawns();
-                room.saveNukers();
                 room.saveExtensions();
                 room.processConstructionFlags();
             }
