@@ -233,6 +233,7 @@ global.install = () => {
             nuker: load("room.nuker"),
             observers: load("room.observer"),
             powerSpawn: load("room.powerSpawn"),
+            spawns: load("room.spawn"),
         },
     });
     global.inject(Spawn, load("spawn"));
