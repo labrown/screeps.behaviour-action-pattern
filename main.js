@@ -229,6 +229,7 @@ global.install = () => {
             labs: load("room.lab"),
             links: load("room.link"),
             observers: load("room.observer"),
+            powerSpawn: load("room.powerSpawn"),
         },
     });
     global.inject(Spawn, load("spawn"));

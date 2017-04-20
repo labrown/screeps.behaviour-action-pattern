@@ -17,30 +17,6 @@ mod.extend = function(){
         if (Room._ext[key].extend) Room._ext[key].extend();
     }
 
-    let PowerSpawns = function(room){
-        this.room = room;
-
-        Object.defineProperties(this, {
-            'all': {
-                configurable: true,
-                get: function() {
-                    if( _.isUndefined(this._all) ){
-                        this._all = [];
-                        let add = entry => {
-                            let o = Game.getObjectById(entry.id);
-                            if( o ) {
-                                _.assign(o, entry);
-                                this._all.push(o);
-                            }
-                        };
-                        _.forEach(this.room.memory.powerSpawns, add);
-                    }
-                    return this._all;
-                }
-            },
-        });
-    };
-
     let Nukers = function(room){
         this.room = room;
 
@@ -275,7 +251,7 @@ mod.extend = function(){
                 configurable: true,
                 get: function() {
                     if( _.isUndefined(this._powerSpawns) ){
-                        this._powerSpawns = new PowerSpawns(this.room);
+                        this._powerSpawns = new Room.PowerSpawn(this.room);
                     }
                     return this._powerSpawns;
                 }
@@ -1048,25 +1024,7 @@ mod.extend = function(){
             nukers.forEach(add);
         } else delete this.memory.nukers;
     };
-    Room.prototype.savePowerSpawns = function() {
-        let powerSpawns = this.find(FIND_MY_STRUCTURES, {
-            filter: (structure) => ( structure.structureType == STRUCTURE_POWER_SPAWN )
-        });
-        if (powerSpawns.length > 0) {
-            this.memory.powerSpawns = [];
 
-            // for each entry add to memory ( if not contained )
-            let add = (powerSpawn) => {
-                let powerSpawnData = this.memory.powerSpawns.find( (l) => l.id == powerSpawn.id );
-                if( !powerSpawnData ) {
-                    this.memory.powerSpawns.push({
-                        id: powerSpawn.id,
-                    });
-                }
-            };
-            powerSpawns.forEach(add);
-        } else delete this.memory.powerSpawns;
-    };
     Room.prototype.saveExtensions = function() {
         const extensions = this.find(FIND_MY_STRUCTURES, {
             filter: s => s instanceof StructureExtension
@@ -1520,19 +1478,6 @@ mod.extend = function(){
         this.memory.hostileIds = this.hostileIds;
     };
 
-    Room.prototype.processPower = function() {
-        // run lab reactions WOO!
-        let powerSpawns = this.find(FIND_MY_STRUCTURES, { filter: (s) => { return s.structureType == STRUCTURE_POWER_SPAWN; } } );
-        for (var i=0;i<powerSpawns.length;i++) {
-            // see if the reaction is possible
-            let powerSpawn = powerSpawns[i];
-            if (powerSpawn.energy >= POWER_SPAWN_ENERGY_RATIO && powerSpawn.power >= 1) {
-                if (global.DEBUG && global.TRACE) trace('Room', { roomName: this.name, actionName: 'processPower' });
-                powerSpawn.processPower();
-            }
-        }
-    };
-
     Room.prototype.prepareResourceOrder = function(containerId, resourceType, amount) {
         let container = Game.getObjectById(containerId);
         if (!this.my || !container || !container.room.name == this.name ||
@@ -1920,7 +1865,6 @@ mod.analyze = function() {
                 room.saveTowers();
                 room.saveSpawns();
                 room.saveNukers();
-                room.savePowerSpawns();
                 room.saveExtensions();
                 room.processConstructionFlags();
             }
@@ -1931,7 +1875,6 @@ mod.analyze = function() {
             }
             room.roadConstruction();
             if (room.hostiles.length > 0) room.processInvaders();
-            if (room.structures.powerSpawn) room.processPower();
             if (totalSitesChanged) room.countMySites();
             if (totalStructuresChanged) room.countMyStructures();
         }
