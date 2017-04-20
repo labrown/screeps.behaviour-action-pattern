@@ -227,6 +227,7 @@ global.install = () => {
         _ext: {
             containers: load("room.container"),
             labs: load("room.lab"),
+            links: load("room.link"),
             observers: load("room.observer"),
         },
     });
