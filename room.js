@@ -235,7 +235,18 @@ mod.extend = function(){
                     }
                     return this._extensions;
                 },
+            },
+            'spawns': {
+            configurable: true,
+            get: function() {
+                if( _.isUndefined(this._spawns) ){
+                    this._spawns = [];
+                    var addSpawn = id => { addById(this._spawns, id); };
+                    _.forEach(this.room.memory.spawns, addSpawn);
+                }
+                return this._spawns;
             }
+        },
         });
     };
 
